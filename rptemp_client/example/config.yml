@@ -1,0 +1,9 @@
+# Example configuration for rptemp_client.
+#
+# Install this file to /etc/rptemp_clnt/config.yml. If it is missing or
+# invalid, the client logs an error and falls back to defaults
+# (localhost:5555, 30s report frequency).
+
+monitor_host: 192.168.1.10   # hostname or IP of the rptemp_monitor instance
+monitor_port: 5555           # TCP port rptemp_monitor is listening on
+report_freq: 30              # Reserved for future use; not yet consumed by this client

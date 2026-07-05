@@ -1,0 +1,15 @@
+[package]
+name = "rptemp_client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+yaml_serde = "0.10.4"
+log = "0.4.33"
+systemd-journal-logger = "2.2.2"
+env_logger = "0.11.11"
+anyhow = "1.0.103"
+gethostname = "1.1.0"
+sysinfo = "0.39.5"
+serde_json = "1.0.150"

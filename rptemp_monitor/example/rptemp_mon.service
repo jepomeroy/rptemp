@@ -1,0 +1,31 @@
+# Example systemd unit for rptemp_monitor.
+#
+# Install:
+#   sudo cp rptemp_monitor /usr/local/bin/rptemp_monitor
+#   sudo mkdir -p /etc/rptemp_mon
+#   sudo cp config.yml /etc/rptemp_mon/config.yml
+#   sudo cp rptemp_mon.service /etc/systemd/system/rptemp_mon.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now rptemp_mon.service
+#
+# Note: claiming the fan controller's USB interface requires access to
+# /dev/bus/usb/*. This unit relies on the "rptemp-usb" group granted access
+# by the udev rule in 99-rptemp-fan-controller.rules — install that rule
+# (which also creates the group) before starting this service, or the
+# device will be inaccessible.
+
+[Unit]
+Description=rptemp_monitor - aggregates host temperatures and drives a USB fan controller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/rptemp_monitor
+Restart=on-failure
+RestartSec=5
+DynamicUser=yes
+SupplementaryGroups=rptemp-usb
+
+[Install]
+WantedBy=multi-user.target

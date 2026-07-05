@@ -1,0 +1,15 @@
+# Example udev rule granting the "rptemp-usb" group access to the fan
+# controller, so rptemp_monitor doesn't need to run as root to claim its
+# USB interface.
+#
+# Install:
+#   sudo groupadd --system rptemp-usb
+#   sudo cp 99-rptemp-fan-controller.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger
+#
+# Replace idVendor/idProduct with your fan controller's actual IDs (decimal
+# 4292/60000 from example/config.yml is 0x10c4/0xea60 in hex, as used
+# below). Check with `lsusb` if you're not sure.
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="10c4", ATTR{idProduct}=="ea60", MODE="0660", GROUP="rptemp-usb"

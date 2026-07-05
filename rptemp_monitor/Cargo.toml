@@ -1,0 +1,15 @@
+[package]
+name = "rptemp_monitor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+axum = "0.8.9"
+tokio = { version = "1.52.3", features = ["full"] }
+yaml_serde = "0.10.4"
+anyhow = "1.0.103"
+log = "0.4.33"
+rusb = "0.9.4"
+systemd-journal-logger = "2.2.2"
+env_logger = "0.11.11"

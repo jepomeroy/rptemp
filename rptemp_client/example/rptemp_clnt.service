@@ -1,0 +1,24 @@
+# Example systemd unit for rptemp_client.
+#
+# Install:
+#   sudo cp rptemp_client /usr/local/bin/rptemp_client
+#   sudo mkdir -p /etc/rptemp_clnt
+#   sudo cp config.yml /etc/rptemp_clnt/config.yml
+#   sudo cp rptemp_clnt.service /etc/systemd/system/rptemp_clnt.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now rptemp_clnt.service
+
+[Unit]
+Description=rptemp_client - reports host CPU temperature to rptemp_monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/rptemp_client
+Restart=on-failure
+RestartSec=5
+DynamicUser=yes
+
+[Install]
+WantedBy=multi-user.target
