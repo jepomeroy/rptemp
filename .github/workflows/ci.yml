@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fmt:
+    name: Format (${{ matrix.crate }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate: [rptemp_client, rptemp_monitor]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: cargo fmt --check
+        working-directory: ${{ matrix.crate }}
+        run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy (${{ matrix.crate }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate: [rptemp_client, rptemp_monitor]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      # Only rptemp_monitor links against libusb (via the rusb crate).
+      - name: Install libusb headers
+        if: matrix.crate == 'rptemp_monitor'
+        run: sudo apt-get update && sudo apt-get install -y libusb-1.0-0-dev
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ matrix.crate }}
+
+      - name: cargo clippy
+        working-directory: ${{ matrix.crate }}
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+  test:
+    name: Test (${{ matrix.crate }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate: [rptemp_client, rptemp_monitor]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install libusb headers
+        if: matrix.crate == 'rptemp_monitor'
+        run: sudo apt-get update && sudo apt-get install -y libusb-1.0-0-dev
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ matrix.crate }}
+
+      - name: cargo test
+        working-directory: ${{ matrix.crate }}
+        run: cargo test --locked

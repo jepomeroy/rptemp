@@ -225,10 +225,7 @@ mod tests {
             temp: 42,
             time: 0,
         };
-        assert_eq!(
-            payload.to_string(),
-            "Host: raspberrypi reports temp of 42"
-        );
+        assert_eq!(payload.to_string(), "Host: raspberrypi reports temp of 42");
     }
 
     #[test]
