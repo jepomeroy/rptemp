@@ -1,11 +1,13 @@
 # Example configuration for rptemp_monitor.
 #
 # Install this file to /etc/rptemp_mon/config.yml. If it is missing or
-# invalid, the service logs an error and falls back to defaults
-# (vendor/product 0xFFFF/0xFFFF, port 5555, target_temp 45), so it can
-# still serve /health without a valid configuration.
+# invalid (including a missing/unrecognized log_level), the service logs an
+# error and falls back to defaults (vendor/product 0xFFFF/0xFFFF, port 5555,
+# target_temp 45, info logging), so it can still serve /health without a
+# valid configuration.
 
 usb_vendor_id: 4292 # USB vendor ID of the fan controller (decimal or 0x-hex), e.g. 0x10C4
 usb_product_id: 60000 # USB product ID of the fan controller, e.g. 0xEA60
 port: 5555 # TCP port the HTTP server listens on
 target_temp: 45 # Reserved for future use; not yet consumed by this service
+log_level: info # off, error, warn, info, debug, or trace

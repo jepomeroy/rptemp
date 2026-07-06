@@ -23,15 +23,17 @@ host currently reporting in.
 ## Configuration
 
 On startup the service reads `/etc/rptemp_mon/config.yml`. If the file is
-missing or invalid, it logs an error and falls back to a default
-configuration (vendor/product `0xFFFF`/`0xFFFF`, port `5555`, target temp
-`45`), so it can still serve `/health` even without a valid configuration.
+missing or invalid (including a missing/unrecognized `log_level`), it logs
+an error and falls back to a default configuration (vendor/product
+`0xFFFF`/`0xFFFF`, port `5555`, target temp `45`, `info` logging), so it can
+still serve `/health` even without a valid configuration.
 
 ```yaml
 usb_vendor_id: 4292      # USB vendor ID of the fan controller (decimal or 0x-hex)
 usb_product_id: 60000    # USB product ID of the fan controller
 port: 5555               # TCP port the HTTP server listens on
 target_temp: 45          # Reserved for future use; not yet consumed by this service
+log_level: info          # off, error, warn, info, debug, or trace
 ```
 
 See [`example/`](example) for a sample config and systemd unit.
