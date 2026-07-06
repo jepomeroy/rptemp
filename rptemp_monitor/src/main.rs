@@ -360,8 +360,7 @@ mod tests {
 
     #[test]
     fn configuration_parses_from_yaml() {
-        let yaml =
-            "usb_vendor_id: 4292\nusb_product_id: 60000\nport: 5555\ntarget_temp: 45\nlog_level: warn\n";
+        let yaml = "usb_vendor_id: 4292\nusb_product_id: 60000\nport: 5555\ntarget_temp: 45\nlog_level: warn\n";
         let config: Configuration = yaml_serde::from_str(yaml).unwrap();
         assert_eq!(config.usb_vendor_id, 4292);
         assert_eq!(config.usb_product_id, 60000);

@@ -271,7 +271,8 @@ mod tests {
 
     #[test]
     fn parse_configuration_reads_valid_yaml() {
-        let yaml = "monitor_host: 192.168.1.10\nmonitor_port: 5555\nreport_freq: 30\nlog_level: warn\n";
+        let yaml =
+            "monitor_host: 192.168.1.10\nmonitor_port: 5555\nreport_freq: 30\nlog_level: warn\n";
         let config = parse_configuration(yaml.as_bytes()).unwrap();
         assert_eq!(
             config,
