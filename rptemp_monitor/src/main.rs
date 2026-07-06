@@ -31,6 +31,14 @@ struct Configuration {
     usb_product_id: u16,
     port: u16,
     target_temp: u8,
+    log_level: String,
+}
+
+/// Resolves the configured log level (e.g. "info", "debug") into a
+/// `log::LevelFilter`, falling back to `Info` if it isn't a recognized name
+/// so problems stay visible rather than being silently dropped.
+fn resolve_log_level(log_level: &str) -> LevelFilter {
+    log_level.parse().unwrap_or(LevelFilter::Info)
 }
 
 #[derive(Deserialize)]
@@ -195,7 +203,7 @@ async fn main() {
         env_logger::init();
     }
 
-    log::set_max_level(LevelFilter::Warn);
+    log::set_max_level(LevelFilter::Info);
 
     let config = match read_configuration() {
         Ok(config) => config,
@@ -207,9 +215,12 @@ async fn main() {
                 usb_product_id: 0xFFFF,
                 port: 5555,
                 target_temp: 45,
+                log_level: "info".to_string(),
             }
         }
     };
+
+    log::set_max_level(resolve_log_level(&config.log_level));
 
     // Start processing host data
     let monitor_state = host_state.clone();
@@ -349,12 +360,34 @@ mod tests {
 
     #[test]
     fn configuration_parses_from_yaml() {
-        let yaml = "usb_vendor_id: 4292\nusb_product_id: 60000\nport: 5555\ntarget_temp: 45\n";
+        let yaml = "usb_vendor_id: 4292\nusb_product_id: 60000\nport: 5555\ntarget_temp: 45\nlog_level: warn\n";
         let config: Configuration = yaml_serde::from_str(yaml).unwrap();
         assert_eq!(config.usb_vendor_id, 4292);
         assert_eq!(config.usb_product_id, 60000);
         assert_eq!(config.port, 5555);
         assert_eq!(config.target_temp, 45);
+        assert_eq!(config.log_level, "warn");
+    }
+
+    #[test]
+    fn configuration_rejects_missing_log_level() {
+        let yaml = "usb_vendor_id: 4292\nusb_product_id: 60000\nport: 5555\ntarget_temp: 45\n";
+        assert!(yaml_serde::from_str::<Configuration>(yaml).is_err());
+    }
+
+    #[test]
+    fn resolve_log_level_parses_valid_level() {
+        assert_eq!(resolve_log_level("debug"), LevelFilter::Debug);
+    }
+
+    #[test]
+    fn resolve_log_level_is_case_insensitive() {
+        assert_eq!(resolve_log_level("WARN"), LevelFilter::Warn);
+    }
+
+    #[test]
+    fn resolve_log_level_defaults_to_info_for_invalid_name() {
+        assert_eq!(resolve_log_level("bogus"), LevelFilter::Info);
     }
 
     #[tokio::test]

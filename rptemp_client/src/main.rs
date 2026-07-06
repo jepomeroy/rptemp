@@ -23,6 +23,14 @@ struct Configuration {
     monitor_host: String,
     monitor_port: u16,
     report_freq: u64,
+    log_level: String,
+}
+
+/// Resolves the configured log level (e.g. "info", "debug") into a
+/// `log::LevelFilter`, falling back to `Info` if it isn't a recognized name
+/// so problems stay visible rather than being silently dropped.
+fn resolve_log_level(log_level: &str) -> LevelFilter {
+    log_level.parse().unwrap_or(LevelFilter::Info)
 }
 
 #[derive(Serialize)]
@@ -92,7 +100,7 @@ fn main() -> ExitCode {
         env_logger::init();
     }
 
-    log::set_max_level(LevelFilter::Warn);
+    log::set_max_level(LevelFilter::Info);
 
     let config = match read_configuration() {
         Ok(config) => config,
@@ -103,9 +111,12 @@ fn main() -> ExitCode {
                 monitor_host: "localhost".to_string(),
                 monitor_port: 5555,
                 report_freq: 30,
+                log_level: "info".to_string(),
             }
         }
     };
+
+    log::set_max_level(resolve_log_level(&config.log_level));
 
     let hostname: String = match gethostname().into_string() {
         Ok(host) => host,
@@ -260,7 +271,8 @@ mod tests {
 
     #[test]
     fn parse_configuration_reads_valid_yaml() {
-        let yaml = "monitor_host: 192.168.1.10\nmonitor_port: 5555\nreport_freq: 30\n";
+        let yaml =
+            "monitor_host: 192.168.1.10\nmonitor_port: 5555\nreport_freq: 30\nlog_level: warn\n";
         let config = parse_configuration(yaml.as_bytes()).unwrap();
         assert_eq!(
             config,
@@ -268,6 +280,7 @@ mod tests {
                 monitor_host: "192.168.1.10".to_string(),
                 monitor_port: 5555,
                 report_freq: 30,
+                log_level: "warn".to_string(),
             }
         );
     }
@@ -276,6 +289,27 @@ mod tests {
     fn parse_configuration_rejects_missing_field() {
         let yaml = "monitor_host: 192.168.1.10\nmonitor_port: 5555\n";
         assert!(parse_configuration(yaml.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn parse_configuration_rejects_missing_log_level() {
+        let yaml = "monitor_host: 192.168.1.10\nmonitor_port: 5555\nreport_freq: 30\n";
+        assert!(parse_configuration(yaml.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn resolve_log_level_parses_valid_level() {
+        assert_eq!(resolve_log_level("debug"), LevelFilter::Debug);
+    }
+
+    #[test]
+    fn resolve_log_level_is_case_insensitive() {
+        assert_eq!(resolve_log_level("WARN"), LevelFilter::Warn);
+    }
+
+    #[test]
+    fn resolve_log_level_defaults_to_info_for_invalid_name() {
+        assert_eq!(resolve_log_level("bogus"), LevelFilter::Info);
     }
 
     #[test]
